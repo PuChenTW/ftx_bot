@@ -1,6 +1,6 @@
 ## Auto renew lending.
 1. Install dependency in requirement.txt
-2. Create a .env file in the same folder and fill your api key, secret and other setting in this file.
+2. Create a `.env` file in the same folder and fill your api key, secret and other setting in this file.
 ```
 KEY=API_KEY
 SECRET=API_SECRET
