@@ -3,12 +3,6 @@ from requests import Request, Session, Response
 from typing import Optional, Dict, Any, List
 import urllib.parse
 import time
-import os
-from dotenv import load_dotenv
-load_dotenv()
-
-KEY = os.getenv('KEY')
-SECRET = os.getenv('SECRET')
 
 
 class FtxClient:
@@ -121,11 +115,14 @@ class FtxClient:
         def get_coin(d): return d['coin'].lower() == coin.lower()
         return list(filter(get_coin, response))
 
+    def get_all_subaccounts(self):
+        return self._get('subaccounts')
 
-client = FtxClient(api_key=KEY, api_secret=SECRET)
-
-if __name__ == '__main__':
-    client.subaccount = 'Mom'
-    next_rate = client.get_lending_rates('usdt')[0]['estimate']
-    total = client.get_wallet_balances('usdt')[0]['total']
-    print(client.get_spot_margin_lending_info('usdt')[0]['lendable'])
+    def get_all_wallet_balances(self):
+        self.subaccount = None
+        balances = [['Main_account', self.get_wallet_balances()]]
+        for subaccount in self.get_all_subaccounts():
+            self.subaccount = subaccount['nickname']
+            balances.append(
+                [subaccount['nickname'], self.get_wallet_balances()])
+        return balances

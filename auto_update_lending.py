@@ -1,11 +1,13 @@
 import os
 import math
-from ftx_client import client
+from ftx_client import FtxClient
 from dotenv import load_dotenv
 load_dotenv()
 
 SUB_ACCOUNT = os.getenv('SUB_ACCOUNT')
 COIN = os.getenv('LEND_COIN')
+KEY = os.getenv('KEY')
+SECRET = os.getenv('SECRET')
 
 
 def update_lending(coin, preserve: float = 0, rate: float = None):
@@ -17,5 +19,6 @@ def update_lending(coin, preserve: float = 0, rate: float = None):
 
 
 if __name__ == '__main__':
+    client = FtxClient(api_key=KEY, api_secret=SECRET)
     client.subaccount = os.getenv(SUB_ACCOUNT)
     update_lending(COIN)
