@@ -8,6 +8,8 @@ SUB_ACCOUNT = os.getenv('SUB_ACCOUNT')
 COIN = os.getenv('LEND_COIN')
 KEY = os.getenv('KEY')
 SECRET = os.getenv('SECRET')
+PRESERVE = os.getenv('PRESERVE', 0)
+RATE = os.getenv('RATE', 0)
 
 
 def update_lending(coin, preserve: float = 0, rate: float = None):
@@ -20,5 +22,16 @@ def update_lending(coin, preserve: float = 0, rate: float = None):
 
 if __name__ == '__main__':
     client = FtxClient(api_key=KEY, api_secret=SECRET)
-    client.subaccount = os.getenv(SUB_ACCOUNT)
-    update_lending(COIN)
+    client.subaccount = SUB_ACCOUNT
+    if SUB_ACCOUNT is None:
+        SUB_ACCOUNT = input('Subaccount: ')
+    if not PRESERVE:
+        PRESERVE = input('Preserve: ')
+    if not RATE:
+        RATE = input('Minimum rate: ')
+
+    offered = client.get_spot_margin_lending_info(COIN)[0].get('offered')
+    if offered > 0:
+        update_lending(COIN, float(PRESERVE), float(RATE))
+    else:
+        print('Detect offered size equal to 0, stop lending')
