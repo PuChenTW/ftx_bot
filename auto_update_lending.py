@@ -1,5 +1,7 @@
+from datetime import datetime
 import os
 import math
+
 from ftx_client import FtxClient
 from dotenv import load_dotenv
 load_dotenv()
@@ -12,7 +14,13 @@ PRESERVE = os.getenv('PRESERVE', 0)
 RATE = os.getenv('RATE', 0)
 
 
-def update_lending(coin, preserve: float = 0, rate: float = None):
+def write_log(msg, file_path: str = 'log.txt'):
+    current = datetime.now().isoformat()
+    with open(file_path, 'a') as f:
+        f.write(f'[{current}] {msg}\n')
+
+
+def update_lending(client: FtxClient, coin: str, preserve: float = 0, rate: float = None):
     lendable = client.get_spot_margin_lending_info(coin)[0]['lendable']
     intrest = rate if rate is not None else client.get_lending_rates(coin)[
         0]['estimate']
@@ -32,6 +40,11 @@ if __name__ == '__main__':
 
     offered = client.get_spot_margin_lending_info(COIN)[0].get('offered')
     if offered > 0:
-        update_lending(COIN, float(PRESERVE), float(RATE))
+        try:
+            update_lending(client, COIN, float(PRESERVE), float(RATE))
+        except Exception as e:
+            write_log(f'Error: {e}')
+        else:
+            write_log(f'Updated {COIN} lending')
     else:
-        print('Detect offered size equal to 0, stop lending')
+        write_log('Detect offered size equal to 0, stop lending')
