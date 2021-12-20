@@ -1,4 +1,5 @@
 import hmac
+from datetime import datetime
 from requests import Request, Session, Response
 from typing import Optional, Dict, Any, List
 import urllib.parse
@@ -78,8 +79,13 @@ class FtxClient:
     def get_open_orders(self, order_id: int, market: str = None) -> List[dict]:
         return self._get('orders', {'market': market, 'order_id': order_id})
 
-    def get_lending_history(self) -> List[dict]:
-        response = self._get('spot_margin/lending_history')
+    def get_lending_history(self, start_time: Optional[str] = None, end_time: Optional[str] = None) -> List[dict]:
+        params = {
+            "start_time": int(datetime.strptime(start_time, '%Y%m%d').timestamp()) if start_time else None,
+            "end_time": int(datetime.strptime(end_time, '%Y%m%d').timestamp()) if end_time else None
+        }
+        params = {k: v for k, v in params.items() if v is not None}
+        response = self._get('spot_margin/lending_history', params)
 
         def get_rate_and_apy(d): return {
             **d,
